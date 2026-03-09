@@ -1,0 +1,9 @@
+{:db {:host "localhost"
+      :port 3306
+      :database "orders_db"
+      :user "root"
+      :password "root"}
+ 
+ :products-service {:base-url "http://localhost:3001"}
+ 
+ :server {:port 3000}}
