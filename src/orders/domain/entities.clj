@@ -1,28 +1,7 @@
 (ns orders.domain.entities
-  (:require [orders.domain.value-objects :as vo]
+  (:require [orders.domain.value-objects.item :as item-vo]
+            [orders.domain.status-transitions :as st]
             [clj-uuid :as uuid]))
-
-(def valid-statuses
-  #{:pending-payment
-    :products-reserved
-    :payment-processed
-    :products-picked
-    :shipped
-    :delivered
-    :cancelled})
-
-(def allowed-transitions
-  {:pending-payment #{:products-reserved :cancelled}
-   :products-reserved #{:payment-processed :cancelled}
-   :payment-processed #{:products-picked :cancelled}
-   :products-picked #{:shipped :cancelled}
-   :shipped #{:delivered}
-   :delivered #{}
-   :cancelled #{}})
-
-(defn- valid-transition?
-  [current-status new-status]
-  (contains? (get allowed-transitions current-status #{}) new-status))
 
 (defn- validate-order
   [order]
@@ -33,7 +12,7 @@
 
 (defn- calculate-total
   [items]
-  (reduce + 0 (map vo/subtotal items)))
+  (reduce + 0 (map item-vo/subtotal items)))
 
 (defn order
   [{:keys [customer-id shipping-address billing-address items]}]
@@ -51,7 +30,7 @@
 
 (defn update-status
   [order new-status]
-  (if (valid-transition? (:status order) new-status)
+  (if (st/valid-transition? (:status order) new-status)
     (assoc order
            :status new-status
            :updated-at (java.time.Instant/now))

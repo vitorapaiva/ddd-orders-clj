@@ -5,7 +5,7 @@
   {:type :order-created
    :data {:order-id (:id order)
           :customer-id (:customer-id order)
-          :items (:items order)
+          :items (map #(select-keys % [:product-id :quantity]) (:items order))
           :total (:total order)
           :shipping-address (:shipping-address order)
           :billing-address (:billing-address order)}

@@ -1,13 +1,14 @@
 (ns orders.adapters.inbound.order-adapter
-  (:require [orders.domain.value-objects :as vo]
+  (:require [orders.domain.value-objects.address :as address]
+            [orders.domain.value-objects.item :as item]
             [cheshire.core :as json]))
 
 (defn json->order-data
   [data]
   {:customer-id (:customer-id data)
-   :shipping-address (vo/address (:shipping-address data))
-   :billing-address (vo/address (:billing-address data))
-   :items (mapv vo/item (:items data))})
+   :shipping-address (address/address (:shipping-address data))
+   :billing-address (address/address (:billing-address data))
+   :items (mapv item/item (:items data))})
 
 (defn db->order
   [row]

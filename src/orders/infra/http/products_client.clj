@@ -2,35 +2,38 @@
   (:require [clj-http.client :as http]
             [cheshire.core :as json]
             [orders.ports.outbound :as ports]
-            [orders.adapters.outbound.products-adapter :as adapter]))
+            [orders.adapters.outbound.products-adapter :as adapter]
+            [orders.infra.http.products-http-config :as http-config]))
+
+(defn- http-request
+  [base-url method path opts]
+  (try
+    (method (http-config/request-url base-url path)
+            (merge http-config/default-options opts))
+    (catch Exception e
+      {:status 0 :error (str "Communication error: " (.getMessage e))})))
 
 (defrecord HTTPProductsClient [base-url]
   ports/ProductsService
   
   (reserve-products [_ order-id items]
-    (try
-      (let [request-body (adapter/items->request order-id items)
-            response (http/post (str base-url "/products/reserve")
-                                {:body (json/generate-string request-body)
-                                 :content-type :json
-                                 :accept :json
-                                 :throw-exceptions false})
-            body (when (:body response)
-                   (json/parse-string (:body response) true))]
-        (adapter/response->result (:status response) body))
-      (catch Exception e
-        {:success false :error (str "Communication error: " (.getMessage e))})))
+    (let [request-body (adapter/items->request order-id items)
+          response (http-request base-url http/post "/products/reserve"
+                                 {:body (json/generate-string request-body)})
+          body (when (:body response)
+                 (json/parse-string (:body response) true))]
+      (if (:error response)
+        {:success false :error (:error response)}
+        (adapter/response->result (:status response) body))))
   
   (release-reservation [_ order-id]
-    (try
-      (let [response (http/delete (str base-url "/products/reserve/" order-id)
-                                  {:accept :json
-                                   :throw-exceptions false})]
+    (let [response (http-request base-url http/delete
+                                 (str "/products/reserve/" order-id))]
+      (if (:error response)
+        {:success false :error (:error response)}
         (if (= 200 (:status response))
           {:success true}
-          {:success false :error "Failed to release reservation"}))
-      (catch Exception e
-        {:success false :error (str "Communication error: " (.getMessage e))}))))
+          {:success false :error "Failed to release reservation"})))))
 
 (defn create-client
   [base-url]

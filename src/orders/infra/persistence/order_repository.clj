@@ -1,6 +1,7 @@
 (ns orders.infra.persistence.order-repository
   (:require [next.jdbc :as jdbc]
             [next.jdbc.result-set :as rs]
+            [orders.infra.persistence.order-queries :as queries]
             [orders.ports.outbound :as ports]
             [orders.adapters.inbound.order-adapter :as inbound-adapter]
             [orders.adapters.outbound.order-adapter :as outbound-adapter]))
@@ -11,8 +12,7 @@
   (save [_ order]
     (let [db-order (outbound-adapter/order->db order)]
       (jdbc/execute! datasource
-                     ["INSERT INTO orders (id, customer_id, shipping_address, billing_address, items, total, status, created_at, updated_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                     [queries/insert
                       (:id db-order)
                       (:customer_id db-order)
                       (:shipping_address db-order)
@@ -26,14 +26,14 @@
   
   (find-by-id [_ id]
     (let [row (jdbc/execute-one! datasource
-                                  ["SELECT * FROM orders WHERE id = ?" id]
+                                  [queries/find-by-id id]
                                   {:builder-fn rs/as-unqualified-lower-maps})]
       (inbound-adapter/db->order row)))
   
   (update-order [_ order]
     (let [db-order (outbound-adapter/order->db order)]
       (jdbc/execute! datasource
-                     ["UPDATE orders SET status = ?, updated_at = ? WHERE id = ?"
+                     [queries/update-status
                       (:status db-order)
                       (:updated_at db-order)
                       (:id db-order)])
@@ -41,7 +41,7 @@
   
   (list-all [_]
     (let [rows (jdbc/execute! datasource
-                               ["SELECT * FROM orders ORDER BY created_at DESC"]
+                               [queries/list-all]
                                {:builder-fn rs/as-unqualified-lower-maps})]
       (mapv inbound-adapter/db->order rows))))
 

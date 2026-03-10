@@ -1,0 +1,18 @@
+(ns orders.adapters.outbound.order-response-adapter
+  "Adapta entidades de domínio para o formato de resposta HTTP JSON.")
+
+(defn order->json
+  [order]
+  {:id (:id order)
+   :customer-id (:customer-id order)
+   :shipping-address (:shipping-address order)
+   :billing-address (:billing-address order)
+   :items (:items order)
+   :total (:total order)
+   :status (name (:status order))
+   :created-at (str (:created-at order))
+   :updated-at (str (:updated-at order))})
+
+(defn orders->json
+  [orders]
+  (mapv order->json orders))
