@@ -1,16 +1,6 @@
 (ns orders.domain.value-objects.address
-  "Value object: endereço. SRP: única responsabilidade de representar e validar endereço.")
-
-(defn- validate
-  [address]
-  (when-not (and (some? (:street-type address))
-                 (some? (:street-name address))
-                 (some? (:number address))
-                 (some? (:district address))
-                 (some? (:city address))
-                 (some? (:state address))
-                 (some? (:zip-code address)))
-    (throw (ex-info "Invalid address: required fields not filled" {:address address}))))
+  "Value object: address. SRP: single responsibility for representing address."
+  (:require [orders.domain.logic.address :as logic]))
 
 (defn address
   [{:keys [street-type street-name number complement district city state zip-code]}]
@@ -22,5 +12,5 @@
            :city city
            :state state
            :zip-code zip-code}]
-    (validate a)
+    (logic/validate a)
     a))

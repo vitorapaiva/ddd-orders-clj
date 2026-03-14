@@ -1,5 +1,5 @@
 (ns orders.adapters.inbound.order-json-adapter
-  "Adapta dados JSON do corpo da requisição HTTP para o formato de domínio."
+  "Adapts JSON request body to domain format."
   (:require [orders.domain.value-objects.address :as address]
             [orders.domain.value-objects.item :as item]))
 

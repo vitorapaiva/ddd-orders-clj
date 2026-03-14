@@ -1,5 +1,5 @@
 (ns orders.adapters.outbound.order-db-adapter
-  "Adapta entidades de domínio para o formato de persistência no banco."
+  "Adapts domain entities to database persistence format."
   (:require [cheshire.core :as json]))
 
 (defn order->db

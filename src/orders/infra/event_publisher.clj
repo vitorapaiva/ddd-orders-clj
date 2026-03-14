@@ -1,5 +1,5 @@
 (ns orders.infra.event-publisher
-  "Publicador de eventos com handlers plugáveis. OCP: novos handlers sem modificar o core."
+  "Event publisher with pluggable handlers. OCP: new handlers without modifying core."
   (:require [orders.ports.outbound :as ports]
             [orders.ports.event-handler :as eh]))
 
@@ -15,6 +15,6 @@
     event))
 
 (defn create-publisher
-  "Cria publicador com lista de handlers. DIP: depende do protocolo EventHandler."
+  "Creates publisher with list of handlers. DIP: depends on EventHandler protocol."
   [& handlers]
   (->EventPublisherWithHandlers (vec handlers)))

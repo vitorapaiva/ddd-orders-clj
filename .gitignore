@@ -1,1 +1,7 @@
 .cpcache
+.clj-kondo
+.lsp
+.cursor
+.cursorignore
+.cursorrules
+.cursorignore

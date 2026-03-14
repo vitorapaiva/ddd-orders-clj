@@ -6,7 +6,7 @@
 
 (defn create-routes
   [deps]
-  [["/order/close" {:post {:handler (close-order/create deps)}}]
-   ["/orders" {:get {:handler (list-orders/create deps)}}]
-   ["/orders/:id" {:get {:handler (get-order/create deps)}}]
-   ["/orders/:id/status" {:put {:handler (update-status/create deps)}}]])
+  [["/order/close" {:post {:handler (close-order/process deps)}}]
+   ["/orders" {:get {:handler (list-orders/process deps)}}]
+   ["/orders/:id" {:get {:handler (get-order/process deps)}}]
+   ["/orders/:id/status" {:put {:handler (update-status/process deps)}}]])

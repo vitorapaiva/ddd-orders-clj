@@ -3,48 +3,35 @@
             [next.jdbc.result-set :as rs]
             [orders.infra.persistence.order-queries :as queries]
             [orders.ports.outbound :as ports]
-            [orders.adapters.inbound.order-adapter :as inbound-adapter]
-            [orders.adapters.outbound.order-adapter :as outbound-adapter]))
+            [orders.adapters.inbound.order-db-adapter :as in.order-db-adapter]
+            [orders.adapters.outbound.order-db-adapter :as out.order-db-adapter]))
+
+(def ^:private row-opts {:builder-fn rs/as-unqualified-lower-maps})
 
 (defrecord MySQLOrderRepository [datasource]
   ports/OrderRepository
   
   (save [_ order]
-    (let [db-order (outbound-adapter/order->db order)]
-      (jdbc/execute! datasource
-                     [queries/insert
-                      (:id db-order)
-                      (:customer_id db-order)
-                      (:shipping_address db-order)
-                      (:billing_address db-order)
-                      (:items db-order)
-                      (:total db-order)
-                      (:status db-order)
-                      (:created_at db-order)
-                      (:updated_at db-order)])
+    (let [db-order (out.order-db-adapter/order->db order)
+          params (mapv db-order queries/insert-columns)]
+      (jdbc/execute! datasource (into [queries/insert] params))
       order))
   
   (find-by-id [_ id]
-    (let [row (jdbc/execute-one! datasource
-                                  [queries/find-by-id id]
-                                  {:builder-fn rs/as-unqualified-lower-maps})]
-      (inbound-adapter/db->order row)))
+    (let [row (jdbc/execute-one! datasource [queries/find-by-id id] row-opts)]
+      (in.order-db-adapter/db->order row)))
   
   (update-order [_ order]
-    (let [db-order (outbound-adapter/order->db order)]
-      (jdbc/execute! datasource
-                     [queries/update-status
-                      (:status db-order)
-                      (:updated_at db-order)
-                      (:id db-order)])
+    (let [db-order (out.order-db-adapter/order->db order)
+          params (mapv db-order queries/update-status-columns)]
+      (jdbc/execute! datasource (into [queries/update-status] params))
       order))
   
   (list-all [_]
-    (let [rows (jdbc/execute! datasource
-                               [queries/list-all]
-                               {:builder-fn rs/as-unqualified-lower-maps})]
-      (mapv inbound-adapter/db->order rows))))
+    (let [rows (jdbc/execute! datasource [queries/list-all] row-opts)]
+      (mapv in.order-db-adapter/db->order rows))))
 
 (defn create-repository
+  "Creates a MySQL-backed OrderRepository for the given datasource."
   [datasource]
   (->MySQLOrderRepository datasource))

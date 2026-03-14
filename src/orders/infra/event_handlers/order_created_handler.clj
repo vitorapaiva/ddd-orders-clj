@@ -1,8 +1,7 @@
 (ns orders.infra.event-handlers.order-created-handler
-  "Handler para evento OrderCreated. SRP: reserva produtos ao criar pedido."
+  "Handler for OrderCreated event. SRP: reserves products when order is created."
   (:require [orders.ports.outbound :as ports]
-            [orders.ports.event-handler :as eh]
-            [orders.domain.entities :as entities]))
+            [orders.ports.event-handler :as eh]))
 
 (defrecord OrderCreatedHandler [products-service]
   eh/EventHandler

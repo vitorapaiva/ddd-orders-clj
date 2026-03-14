@@ -1,13 +1,12 @@
 (ns orders.infra.http.handlers.close-order
-  "Handler HTTP para fechar pedido. SRP: único endpoint."
+  "HTTP handler for closing order. SRP: single endpoint."
   (:require [orders.ports.inbound.close-order :as use-case]
             [orders.adapters.inbound.order-json-adapter :as order-json]
             [orders.adapters.outbound.order-response-adapter :as order-response]
             [orders.infra.http.response-helper :as response]
             [orders.infra.http.handler-exception-resolver :as exception-resolver]))
 
-(defn create
-  "Cria handler. DIP: recebe deps (repository, products-client, event-publisher)."
+(defn process
   [{:keys [repository event-publisher]}]
   (fn [request]
     (try

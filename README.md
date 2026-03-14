@@ -7,39 +7,57 @@ Serviço de Pedidos implementado em Clojure seguindo Domain-Driven Design e Arqu
 ```
 src/orders/
 ├── domain/                    # Núcleo do Domínio
-│   ├── entities.clj           # Entidade Pedido (raiz do agregado)
-│   ├── value_objects.clj      # Objetos de Valor (Endereço, Item, Status)
-│   └── events.clj             # Eventos de Domínio
+│   ├── entities/
+│   │   └── order.clj          # Entidade Pedido (raiz do agregado)
+│   ├── logic/                 # Lógica de validação
+│   │   ├── address.clj
+│   │   ├── item.clj
+│   │   ├── order.clj
+│   │   └── status_transitions.clj
+│   ├── value_objects/         # Objetos de Valor
+│   │   ├── address.clj
+│   │   └── item.clj
+│   └── events/                # Eventos de Domínio
+│       ├── order_created.clj
+│       └── order_updated.clj
 ├── ports/                     # Portas (Interfaces)
-│   ├── inbound.clj            # Casos de Uso (entrada)
-│   └── outbound.clj           # Protocolos para repositório e serviços externos
-└── adapters/                  # Adaptadores (Implementações)
-    ├── inbound/
-    │   └── http.clj           # API REST
-    └── outbound/
-        ├── repository.clj     # Persistência MySQL
-        ├── products_client.clj # Cliente HTTP para serviço de Produtos
-        └── event_publisher.clj # Publicador de eventos
+│   ├── inbound/               # Casos de Uso
+│   │   ├── close_order.clj
+│   │   ├── list_orders.clj
+│   │   ├── get_order.clj
+│   │   └── update_order_status.clj
+│   ├── outbound.clj           # Protocolos
+│   └── event_handler.clj     # Protocolo de event handlers
+├── adapters/
+│   ├── inbound/               # JSON, DB → domínio
+│   │   ├── order_json_adapter.clj
+│   │   └── order_db_adapter.clj
+│   └── outbound/              # Domínio → resposta, DB
+│       ├── order_response_adapter.clj
+│       ├── order_db_adapter.clj
+│       └── products_adapter.clj
+└── infra/
+    ├── http/                  # Handlers, server, produtos client
+    ├── persistence/            # Database, repository
+    └── event_handlers/        # OrderCreated, OrderUpdated
 ```
 
 ## Arquitetura Hexagonal
 
 ### Núcleo (Domain)
-O núcleo contém as regras de negócio puras, sem dependências externas:
-- **Entidades**: Pedido com seus itens
-- **Objetos de Valor**: Endereço, Item, Status
-- **Eventos**: PedidoCriado, PedidoAtualizado
+- **Entidades**: Pedido
+- **Value Objects**: Address, Item
+- **Lógica**: validações e transições de status
+- **Eventos**: OrderCreated, OrderUpdated
 
 ### Portas (Ports)
-Interfaces que definem como o núcleo se comunica com o mundo externo:
-- **Inbound**: Casos de uso (fechar-pedido, atualizar-status)
-- **Outbound**: Protocolos (PedidoRepository, ProdutosService, EventPublisher)
+- **Inbound**: Casos de uso (close-order, list-orders, get-order, update-order-status)
+- **Outbound**: Protocolos (OrderRepository, ProductsService, EventPublisher)
 
 ### Adaptadores (Adapters)
-Implementações concretas das portas:
-- **HTTP**: API REST usando Ring/Reitit
-- **MySQL**: Persistência usando next.jdbc
-- **HTTP Client**: Comunicação com serviço de Produtos
+- **HTTP**: Ring/Reitit
+- **MySQL**: next.jdbc
+- **HTTP Client**: Serviço de Produtos
 
 ## API
 
@@ -49,41 +67,48 @@ Fecha um novo pedido.
 **Request:**
 ```json
 {
-  "cliente-id": "uuid-do-cliente",
-  "endereco-entrega": {
-    "tipo-logradouro": "Rua",
-    "nome-logradouro": "das Flores",
-    "numero": "123",
-    "complemento": "Apto 45",
-    "bairro": "Centro",
-    "cidade": "São Paulo",
-    "estado": "SP",
-    "cep": "01234-567"
+  "customer-id": "uuid-do-cliente",
+  "shipping-address": {
+    "street-type": "Rua",
+    "street-name": "das Flores",
+    "number": "123",
+    "complement": "Apto 45",
+    "district": "Centro",
+    "city": "São Paulo",
+    "state": "SP",
+    "zip-code": "01234-567"
   },
-  "endereco-cobranca": {
-    "tipo-logradouro": "Rua",
-    "nome-logradouro": "das Flores",
-    "numero": "123",
-    "complemento": "Apto 45",
-    "bairro": "Centro",
-    "cidade": "São Paulo",
-    "estado": "SP",
-    "cep": "01234-567"
+  "billing-address": {
+    "street-type": "Rua",
+    "street-name": "das Flores",
+    "number": "123",
+    "complement": "Apto 45",
+    "district": "Centro",
+    "city": "São Paulo",
+    "state": "SP",
+    "zip-code": "01234-567"
   },
-  "itens": [
-    {"produto-id": "uuid-produto", "quantidade": 2, "preco": 29.90}
+  "items": [
+    {"product-id": "uuid-produto", "quantity": 2, "price": 29.90}
   ]
 }
 ```
 
-### GET /pedidos
+### GET /orders
 Lista todos os pedidos.
 
-### GET /pedidos/:id
+### GET /orders/:id
 Consulta um pedido por ID.
 
-### PUT /pedidos/:id/status
+### PUT /orders/:id/status
 Atualiza o status de um pedido.
+
+**Request:**
+```json
+{
+  "status": "products-reserved"
+}
+```
 
 ## Executando
 
@@ -94,18 +119,18 @@ clj -M:run
 
 ## Banco de Dados
 
-O serviço cria automaticamente a tabela `pedidos` no MySQL.
+O serviço cria automaticamente a tabela `orders` no MySQL.
 
 ```sql
-CREATE TABLE IF NOT EXISTS pedidos (
+CREATE TABLE IF NOT EXISTS orders (
   id VARCHAR(36) PRIMARY KEY,
-  cliente_id VARCHAR(36) NOT NULL,
-  endereco_entrega JSON NOT NULL,
-  endereco_cobranca JSON NOT NULL,
-  itens JSON NOT NULL,
-  valor_total DECIMAL(10, 2) NOT NULL,
+  customer_id VARCHAR(36) NOT NULL,
+  shipping_address JSON NOT NULL,
+  billing_address JSON NOT NULL,
+  items JSON NOT NULL,
+  total DECIMAL(10, 2) NOT NULL,
   status VARCHAR(50) NOT NULL,
-  criado_em TIMESTAMP NOT NULL,
-  atualizado_em TIMESTAMP NOT NULL
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
 );
 ```

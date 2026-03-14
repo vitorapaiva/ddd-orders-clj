@@ -1,6 +1,6 @@
 (ns orders.ports.event-handler
-  "Protocolo para handlers de eventos. ISP: interface focada em suporte e execução.")
+  "Protocol for event handlers. ISP: interface focused on support and execution.")
 
 (defprotocol EventHandler
-  (supports? [this event] "Retorna true se este handler processa o evento.")
-  (handle [this event] "Processa o evento."))
+  (supports? [this event] "Returns true if this handler processes the event.")
+  (handle [this event] "Processes the event."))

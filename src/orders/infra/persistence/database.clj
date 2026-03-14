@@ -2,6 +2,7 @@
   (:require [next.jdbc :as jdbc]))
 
 (defn create-datasource
+  "Creates a MySQL datasource from config map (host, port, database, user, password)."
   [{:keys [host port database user password]}]
   (jdbc/get-datasource
    {:dbtype "mysql"
@@ -27,5 +28,6 @@
    )")
 
 (defn create-tables!
+  "Creates the orders table if it does not exist."
   [datasource]
   (jdbc/execute! datasource [sql-create-orders-table]))

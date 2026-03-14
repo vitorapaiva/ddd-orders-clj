@@ -1,15 +1,15 @@
 (ns orders.ports.inbound.close-order
-  "Caso de uso: fechar pedido. SRP: única responsabilidade."
-  (:require [orders.domain.entities :as entities]
-            [orders.domain.events :as events]
+  "Use case: close order. SRP: single responsibility."
+  (:require [orders.domain.entities.order :as order-domain]
+            [orders.domain.events.order-created :as order-created-event]
             [orders.ports.outbound :as outbound]))
 
 (defn execute
-  "Executa o caso de uso. DIP: repository e event-publisher são abstrações."
+  "Executes the use case. DIP: repository and event-publisher are abstractions."
   [repository event-publisher order-data]
-  (let [order (entities/order order-data)]
+  (let [order (order-domain/order order-data)]
     (outbound/save repository order)
-    (outbound/publish event-publisher (events/order-created order))
-    (let [updated-order (entities/update-status order :products-reserved)]
+    (outbound/publish event-publisher (order-created-event/order-created order))
+    (let [updated-order (order-domain/update-status order :products-reserved)]
       (outbound/update-order repository updated-order)
       {:success true :order updated-order})))

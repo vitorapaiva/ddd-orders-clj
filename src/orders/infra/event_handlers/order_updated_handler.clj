@@ -1,5 +1,5 @@
 (ns orders.infra.event-handlers.order-updated-handler
-  "Handler para evento OrderUpdated. SRP: side-effects ao atualizar status (ex: log)."
+  "Handler for OrderUpdated event. SRP: side-effects when status is updated (e.g. logging)."
   (:require [orders.ports.event-handler :as eh]))
 
 (defrecord OrderUpdatedHandler []
@@ -7,7 +7,7 @@
   (supports? [_ event]
     (= :order-updated (:type event)))
   (handle [_ _event]
-    ;; Nenhuma ação necessária atualmente; extensível no futuro (ex: notificações)
+    ;; No action required currently; extensible in future (e.g. notifications)
     nil))
 
 (defn create-handler

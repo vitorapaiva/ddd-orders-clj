@@ -1,5 +1,5 @@
 (ns orders.adapters.outbound.order-response-adapter
-  "Adapta entidades de domínio para o formato de resposta HTTP JSON.")
+  "Adapts domain entities to HTTP JSON response format.")
 
 (defn order->json
   [order]

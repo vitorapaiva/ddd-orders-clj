@@ -1,12 +1,11 @@
 (ns orders.infra.http.handlers.list-orders
-  "Handler HTTP para listar pedidos. SRP: único endpoint."
+  "HTTP handler for listing orders. SRP: single endpoint."
   (:require [orders.ports.inbound.list-orders :as use-case]
             [orders.adapters.outbound.order-response-adapter :as order-response]
             [orders.infra.http.response-helper :as response]
             [orders.infra.http.handler-exception-resolver :as exception-resolver]))
 
-(defn create
-  "Cria handler. DIP: recebe deps (repository)."
+(defn process
   [{:keys [repository]}]
   (fn [_request]
     (try

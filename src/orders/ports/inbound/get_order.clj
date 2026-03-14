@@ -1,9 +1,9 @@
 (ns orders.ports.inbound.get-order
-  "Caso de uso: obter pedido por ID. SRP: única responsabilidade."
+  "Use case: get order by ID. SRP: single responsibility."
   (:require [orders.ports.outbound :as outbound]))
 
 (defn execute
-  "Executa o caso de uso. DIP: repository é abstração."
+  "Executes the use case. DIP: repository is an abstraction."
   [repository order-id]
   (let [order (outbound/find-by-id repository order-id)]
     (if order

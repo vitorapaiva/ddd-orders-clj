@@ -1,11 +1,17 @@
 (ns orders.infra.persistence.order-queries)
 
+(def insert-columns
+  [:id :customer_id :shipping_address :billing_address :items :total :status :created_at :updated_at])
+
 (def insert
   "INSERT INTO orders (id, customer_id, shipping_address, billing_address, items, total, status, created_at, updated_at)
    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 (def find-by-id
   "SELECT * FROM orders WHERE id = ?")
+
+(def update-status-columns
+  [:status :updated_at :id])
 
 (def update-status
   "UPDATE orders SET status = ?, updated_at = ? WHERE id = ?")

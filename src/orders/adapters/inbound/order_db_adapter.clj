@@ -1,5 +1,5 @@
 (ns orders.adapters.inbound.order-db-adapter
-  "Adapta linhas do banco de dados para entidades de domínio."
+  "Adapts database rows to domain entities."
   (:require [cheshire.core :as json]))
 
 (defn db->order

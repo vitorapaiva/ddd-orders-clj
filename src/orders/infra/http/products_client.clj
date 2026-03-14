@@ -6,6 +6,7 @@
             [orders.infra.http.products-http-config :as http-config]))
 
 (defn- http-request
+  "Performs HTTP request. Returns {:status :body} on success or {:status 0 :error ...} on exception."
   [base-url method path opts]
   (try
     (method (http-config/request-url base-url path)
@@ -17,24 +18,17 @@
   ports/ProductsService
   
   (reserve-products [_ order-id items]
-    (let [request-body (adapter/items->request order-id items)
-          response (http-request base-url http/post "/products/reserve"
-                                 {:body (json/generate-string request-body)})
-          body (when (:body response)
-                 (json/parse-string (:body response) true))]
-      (if (:error response)
-        {:success false :error (:error response)}
-        (adapter/response->result (:status response) body))))
+    (let [response (http-request base-url http/post "/products/reserve"
+                                 {:body (json/generate-string (adapter/items->request order-id items))})]
+      (adapter/response->result
+        (cond-> response (:body response) (update :body #(json/parse-string % true))))))
   
   (release-reservation [_ order-id]
     (let [response (http-request base-url http/delete
-                                 (str "/products/reserve/" order-id))]
-      (if (:error response)
-        {:success false :error (:error response)}
-        (if (= 200 (:status response))
-          {:success true}
-          {:success false :error "Failed to release reservation"})))))
+                                 (str "/products/reserve/" order-id) {})]
+      (adapter/release-response->result response))))
 
 (defn create-client
+  "Creates an HTTP client for the products service at base-url."
   [base-url]
   (->HTTPProductsClient base-url))
