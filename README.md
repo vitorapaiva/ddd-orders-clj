@@ -1,68 +1,28 @@
 # DDD Orders - Clojure
 
-Serviço de Pedidos implementado em Clojure seguindo Domain-Driven Design e Arquitetura Hexagonal.
+Order service implemented in Clojure following Domain-Driven Design and Hexagonal Architecture.
 
-## Estrutura do Projeto
+## Hexagonal Architecture
 
-```
-src/orders/
-├── domain/                    # Núcleo do Domínio
-│   ├── entities/
-│   │   └── order.clj          # Entidade Pedido (raiz do agregado)
-│   ├── logic/                 # Lógica de validação
-│   │   ├── address.clj
-│   │   ├── item.clj
-│   │   ├── order.clj
-│   │   └── status_transitions.clj
-│   ├── value_objects/         # Objetos de Valor
-│   │   ├── address.clj
-│   │   └── item.clj
-│   └── events/                # Eventos de Domínio
-│       ├── order_created.clj
-│       └── order_updated.clj
-├── ports/                     # Portas (Interfaces)
-│   ├── inbound/               # Casos de Uso
-│   │   ├── close_order.clj
-│   │   ├── list_orders.clj
-│   │   ├── get_order.clj
-│   │   └── update_order_status.clj
-│   ├── outbound.clj           # Protocolos
-│   └── event_handler.clj     # Protocolo de event handlers
-├── adapters/
-│   ├── inbound/               # JSON, DB → domínio
-│   │   ├── order_json_adapter.clj
-│   │   └── order_db_adapter.clj
-│   └── outbound/              # Domínio → resposta, DB
-│       ├── order_response_adapter.clj
-│       ├── order_db_adapter.clj
-│       └── products_adapter.clj
-└── infra/
-    ├── http/                  # Handlers, server, produtos client
-    ├── persistence/            # Database, repository
-    └── event_handlers/        # OrderCreated, OrderUpdated
-```
-
-## Arquitetura Hexagonal
-
-### Núcleo (Domain)
-- **Entidades**: Pedido
+### Core (Domain)
+- **Entities**: Order
 - **Value Objects**: Address, Item
-- **Lógica**: validações e transições de status
-- **Eventos**: OrderCreated, OrderUpdated
+- **Logic**: validations and status transitions
+- **Events**: OrderCreated, OrderUpdated
 
-### Portas (Ports)
-- **Inbound**: Casos de uso (close-order, list-orders, get-order, update-order-status)
-- **Outbound**: Protocolos (OrderRepository, ProductsService, EventPublisher)
+### Ports
+- **Inbound**: Use cases (close-order, list-orders, get-order, update-order-status)
+- **Outbound**: Protocols (OrderRepository, ProductsService, EventPublisher)
 
-### Adaptadores (Adapters)
+### Adapters
 - **HTTP**: Ring/Reitit
 - **MySQL**: next.jdbc
-- **HTTP Client**: Serviço de Produtos
+- **HTTP Client**: Products Service
 
 ## API
 
 ### POST /order/close
-Fecha um novo pedido.
+Closes a new order.
 
 **Request:**
 ```json
@@ -95,13 +55,13 @@ Fecha um novo pedido.
 ```
 
 ### GET /orders
-Lista todos os pedidos.
+Lists all orders.
 
 ### GET /orders/:id
-Consulta um pedido por ID.
+Gets an order by ID.
 
 ### PUT /orders/:id/status
-Atualiza o status de um pedido.
+Updates an order status.
 
 **Request:**
 ```json
@@ -110,16 +70,16 @@ Atualiza o status de um pedido.
 }
 ```
 
-## Executando
+## Running
 
 ```bash
-# Baixar dependências e executar
+# Download dependencies and run
 clj -M:run
 ```
 
-## Banco de Dados
+## Database
 
-O serviço cria automaticamente a tabela `orders` no MySQL.
+The service automatically creates the `orders` table in MySQL.
 
 ```sql
 CREATE TABLE IF NOT EXISTS orders (
