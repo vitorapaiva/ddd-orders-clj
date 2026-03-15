@@ -27,29 +27,29 @@ Closes a new order.
 **Request:**
 ```json
 {
-  "customer-id": "uuid-do-cliente",
+  "customer-id": "customer-uuid",
   "shipping-address": {
-    "street-type": "Rua",
-    "street-name": "das Flores",
+    "street-type": "Street",
+    "street-name": "Main",
     "number": "123",
-    "complement": "Apto 45",
-    "district": "Centro",
-    "city": "São Paulo",
-    "state": "SP",
+    "complement": "Apt 45",
+    "district": "Center",
+    "city": "New York",
+    "state": "NY",
     "zip-code": "01234-567"
   },
   "billing-address": {
-    "street-type": "Rua",
-    "street-name": "das Flores",
+    "street-type": "Street",
+    "street-name": "Main",
     "number": "123",
-    "complement": "Apto 45",
-    "district": "Centro",
-    "city": "São Paulo",
-    "state": "SP",
+    "complement": "Apt 45",
+    "district": "Center",
+    "city": "New York",
+    "state": "NY",
     "zip-code": "01234-567"
   },
   "items": [
-    {"product-id": "uuid-produto", "quantity": 2, "price": 29.90}
+    {"product-id": "product-uuid", "quantity": 2, "price": 29.90}
   ]
 }
 ```
